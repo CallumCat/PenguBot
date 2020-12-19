@@ -1,5 +1,5 @@
 const { Monitor, ServerLog } = require("../index");
-const inviteRegex = /(https?:\/\/)?(www\.)?(discord\.(gg|li|me|io)|discordapp\.com\/invite|invite\.gg)\/.+/;
+const inviteRegex = /(https?:\/\/)?(www\.)?(discord\.(gg|li|me|io)|(discordapp|discord)\.com\/invite|invite\.gg)\/.+/;
 
 module.exports = class extends Monitor {
 
@@ -12,10 +12,10 @@ module.exports = class extends Monitor {
     }
 
     async run(msg) {
-        if (!msg.guild || !msg.guild.settings.automod.invites) return;
+        if (!msg.guild || !msg.guild.settings.get("automod.invites")) return;
         if (this.client.user.id !== "303181184718995457" && await msg.guild.members.fetch("303181184718995457").catch(() => null)) return;
 
-        if (msg.guild.settings.toggles.staffbypass && await msg.hasAtLeastPermissionLevel(3)) return;
+        if (msg.guild.settings.get("toggles.staffbypass") && await msg.hasAtLeastPermissionLevel(3)) return;
 
         if (!inviteRegex.test(msg.content)) return;
 

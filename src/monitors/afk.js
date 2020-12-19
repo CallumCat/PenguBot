@@ -1,4 +1,4 @@
-const { Monitor, config } = require("../index");
+const { Monitor } = require("../index");
 
 module.exports = class extends Monitor {
 
@@ -9,10 +9,7 @@ module.exports = class extends Monitor {
     async run(msg) {
         if (!msg.guild || !msg.channel || !msg.channel.postable) return;
 
-        const patreonBotMember = await msg.guild.members.fetch("438049470094114816").catch(() => null);
-        if (!config.patreon && patreonBotMember) return;
-
-        if (msg.author.settings.afk.time) await this.checkAfk(msg);
+        if (msg.author.settings.get("afk.time")) await this.checkAfk(msg);
         if (msg.mentions.users.size) await this.afkMentioned(msg);
     }
 
@@ -25,11 +22,12 @@ module.exports = class extends Monitor {
 
     async afkMentioned(msg) {
         const mentioned = msg.mentions.users.first();
-        const { afk } = mentioned.settings;
 
-        if (!afk.time) return;
+        const afkTime = mentioned.settings.get("afk.time");
+        if (!afkTime) return;
 
-        return msg.sendLocale("MONITOR_AFK_ISAFK", [mentioned.username, afk.reason, afk.time]);
+        const afkReason = mentioned.settings.get("afk.reason");
+        return msg.sendLocale("MONITOR_AFK_ISAFK", [mentioned.username, afkReason, afkTime]);
     }
 
 };

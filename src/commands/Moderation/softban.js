@@ -36,7 +36,7 @@ module.exports = class extends Command {
             target = user;
         }
 
-        const msgDays = "messages" in msg.flags ? Number(msg.flags.messages) : 7;
+        const msgDays = "messages" in msg.flagArgs ? Number(msg.flagArgs.messages) : 7;
         if (msgDays < 1 || msgDays >= 8) throw `${this.client.emotes.cross} ***Invalid days of messages to be deleted, 1-7 only.***`;
 
         await msg.guild.members.ban(target, { reason: reason ? reason : `No Reason Specified - ${msg.author.tag}`, days: msgDays })
@@ -44,7 +44,7 @@ module.exports = class extends Command {
         await msg.guild.members.unban(target, "PenguBot Softban")
             .catch(e => msg.reply(`${this.client.emotes.cross} ***There was an error: ${e}***`));
 
-        if (msg.guild.settings.channels.modlogs) {
+        if (msg.guild.settings.get("channels.modlogs")) {
             await new ModLog(msg.guild)
                 .setType("softban")
                 .setModerator(msg.author)

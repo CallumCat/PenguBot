@@ -1,13 +1,12 @@
 const Command = require("../../lib/structures/KlasaCommand");
 const { Canvas } = require("canvas-constructor");
 const fs = require("fs-nextra");
-const { get } = require("snekfetch");
 const { join } = require("path");
 
-Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "Roboto-Regular.ttf"), "Roboto");
-Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "RobotoCondensed-Regular.ttf"), "Roboto Condensed");
-Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "RobotoMono-Light.ttf"), "Roboto Mono");
-Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "NotoEmoji-Regular.ttf"), "NotoEmoji");
+Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "Roboto-Regular.ttf"), { family: "Roboto" });
+Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "RobotoCondensed-Regular.ttf"), { family: "Roboto Condensed" });
+Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "RobotoMono-Light.ttf"), { family: "Roboto Mono" });
+Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "NotoEmoji-Regular.ttf"), { family: "NotoEmoji" });
 
 module.exports = class extends Command {
 
@@ -32,7 +31,11 @@ module.exports = class extends Command {
     async createImage(user) {
         await user.settings.sync(true);
         const r = this.client.providers.default.db;
-        const { xp, level: lvl, snowflakes, reps, title } = user.settings;
+        const xp = user.settings.get("xp");
+        const lvl = user.settings.get("level");
+        const snowflakes = user.settings.get("snowflakes");
+        const reps = user.settings.get("reps");
+        const title = user.settings.get("title");
 
         const oldLvl = Math.floor((lvl / 0.2) ** 2);
         const nextLvl = Math.floor(((lvl + 1) / 0.2) ** 2);
@@ -42,12 +45,9 @@ module.exports = class extends Command {
             .run();
         const pos = query.length ? `#${Number(query) + 1}` : "More Than 10,000";
 
-        const bgName = user.settings.profilebg;
+        const bgName = user.settings.get("profilebg");
         const bgImg = await fs.readFile(`../assets/profiles/bg/${bgName}.png`);
-        const avatar = await get(user.displayAvatarURL({ format: "png", sze: 256 })).then(res => res.body).catch(e => {
-            Error.captureStackTrace(e);
-            return e;
-        });
+        const avatar = await this.fetchURL(user.displayAvatarURL({ format: "png", sze: 256 }), { type: "buffer" });
 
         return await new Canvas(300, 300)
             // Initializing & Avatar

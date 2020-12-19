@@ -13,7 +13,7 @@ module.exports = class extends Command {
     async run(msg) {
         let [users, guilds, channels, memory, vc, cpm, listeners] = [0, 0, 0, 0, 0, 0, 0];
 
-        const results = await this.client.shard.broadcastEval(`[this.guilds.reduce((prev, val) => val.memberCount + prev, 0), this.guilds.size, this.channels.size, (process.memoryUsage().heapUsed / 1024 / 1024), this.music.filter(music => music.playing).size, this.health.commands.cmdCount[59].count, this.music.filter(music => music.playing && music.voiceChannel).map(music => music.voiceChannel.members.filter(mem => !mem.user.bot).size).reduce((prev, val) => prev + val, 0)]`);
+        const results = await this.client.shard.broadcastEval(`[this.guilds.cache.reduce((prev, val) => val.memberCount + prev, 0), this.guilds.cache.size, this.channels.cache.size, (process.memoryUsage().heapUsed / 1024 / 1024), this.music.filter(music => music.playing).size, this.health.commands.cmdCount[59].count, this.music.filter(music => music.playing).map(music => music.voiceChannel && music.voiceChannel.members.filter(mem => !mem.user.bot).size).reduce((prev, val) => prev + val, 0)]`);
         for (const result of results) {
             users += result[0];
             guilds += result[1];
@@ -36,7 +36,7 @@ module.exports = class extends Command {
             .addField("❯ Guilds", guilds.toLocaleString(), true)
             .addField("❯ Channels", channels.toLocaleString(), true)
             .addField("❯ Voice Streams", vc.toLocaleString(), true)
-            .addField("❯ Total Commands Ran", this.client.settings.counter.total.toLocaleString(), true)
+            .addField("❯ Total Commands Ran", this.client.settings.get("counter.total").toLocaleString(), true)
             .addField("❯ CPM", cpm, true)
             .addField("❯ Listeners", listeners, true)
             .addField("❯ Sharding", `**Cluster:** ${this.client.shard.id + 1} / ${this.client.shard.clusterCount} | **Shard:** ${shardID} / ${this.client.shard.shardCount}`, true)

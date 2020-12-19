@@ -1,6 +1,6 @@
 {
   "name": "pengubot",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "PenguBot Rewrite for Performance and Stability.",
   "main": "src/main.js",
   "scripts": {
@@ -27,30 +27,29 @@
   },
   "homepage": "https://github.com/AdityaTD/PenguBot#readme",
   "dependencies": {
-    "@k3rn31p4nic/google-translate-api": "^1.1.0",
-    "@kcp/functions": "^1.0.0",
+    "@k3rn31p4nic/google-translate-api": "^1.1.1",
+    "@kcp/functions": "github:pengubot/functions#build",
+    "@lavacord/discord.js": "^0.0.7",
+    "@pengubot/music": "github:pengubot/music#build",
     "breadtags": "github:PenguBot/bread-tags",
     "bufferutil": "^4.0.1",
-    "canvas": "^2.5.0",
-    "canvas-constructor": "github:kyranet/canvasConstructor",
-    "cheerio": "^1.0.0-rc.3",
-    "discord.js": "github:discordjs/discord.js#master",
-    "discord.js-lavalink": "github:MrJacz/discord.js-lavalink#v3",
-    "hot-shots": "^6.3.0",
-    "klasa": "github:dirigeants/klasa#v1.0.0-alpha",
-    "klasa-api": "TridentBot/klasa-api#v1-alpha",
-    "klasa-member-gateway": "github:MrJacz/klasa-member-gateway",
-    "kurasuta": "^1.0.0",
+    "canvas": "^2.6.0",
+    "canvas-constructor": "3.0.3",
+    "discord.js": "^12.4.1",
+    "hot-shots": "^7.4.2",
+    "klasa": "github:pengubot/klasa#stable",
+    "klasa-api": "github:PenguBot/klasa-api#v1-alpha",
+    "kurasuta": "^2.2.0",
     "node-fetch": "^2.6.0",
+    "node-html-parser": "^1.2.20",
     "raven": "^2.6.4",
     "rethinkdbdash": "^2.3.31",
-    "snekfetch": "^4.0.4",
     "utf-8-validate": "^5.0.2",
-    "zlib-sync": "^0.1.5"
+    "zlib-sync": "^0.1.6"
   },
   "devDependencies": {
-    "eslint": "6.3.0",
-    "eslint-plugin-node": "^10.0.0",
+    "eslint": "7.1.0",
+    "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^4.2.1"
   }
 }

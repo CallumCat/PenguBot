@@ -34,9 +34,9 @@ module.exports = class extends Command {
             target = user;
         }
 
-        let msgDays = msg.flags.messages || msg.flags.msg;
+        let msgDays = msg.flagArgs.messages || msg.flagArgs.msg;
         msgDays = Number(msgDays);
-        const banDays = msg.flags.duration || msg.flags.tempban || msg.flags.time || null;
+        const banDays = msg.flagArgs.duration || msg.flagArgs.tempban || msg.flagArgs.time || null;
         let duration;
         banDays ? duration = new Duration(banDays) : null;
 
@@ -45,7 +45,7 @@ module.exports = class extends Command {
 
         await msg.guild.members.ban(target, { reason: reason ? reason : `No Reason Specified - ${msg.author.tag}`, days: msgDays });
 
-        if (msg.guild.settings.channels.modlogs) {
+        if (msg.guild.settings.get("channels.modlogs")) {
             await new ModLog(msg.guild)
                 .setType("ban")
                 .setModerator(msg.author)

@@ -1,12 +1,11 @@
-const MusicCommand = require("../../lib/structures/MusicCommand");
+const KlasaCommand = require("../../lib/structures/KlasaCommand");
 const { MessageEmbed } = require("discord.js");
 
-module.exports = class extends MusicCommand {
+module.exports = class extends KlasaCommand {
 
     constructor(...args) {
         super(...args, {
             cooldown: 10,
-            aliases: ["np", "currentsong", "song"],
             requiredPermissions: ["USE_EXTERNAL_EMOJIS", "EMBED_LINKS"],
             description: language => language.get("COMMAND_MUSIC_DESCRIPTION"),
             extendedHelp: "No extended help available."
@@ -14,7 +13,7 @@ module.exports = class extends MusicCommand {
     }
 
     async run(msg) {
-        const { prefix } = msg.guildSettings;
+        const prefix = msg.guild.settings.get("prefix");
         const embed = new MessageEmbed()
             .setColor("#91c3d2")
             .setTitle("🎵 | Music Help - PenguBot")

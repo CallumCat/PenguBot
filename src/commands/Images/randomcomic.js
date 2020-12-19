@@ -1,7 +1,5 @@
-const Command = require("../../lib/structures/KlasaCommand");
-const { get } = require("snekfetch");
-const cheerio = require("cheerio");
-const { MessageEmbed } = require("discord.js");
+const { Command, MessageEmbed } = require("../../index");
+const { parse } = require("node-html-parser");
 
 module.exports = class extends Command {
 
@@ -16,20 +14,19 @@ module.exports = class extends Command {
     }
 
     async run(msg) {
-        try {
-            const { text } = await get("http://explosm.net/rcg/").catch(() => msg.sendMessage(`${this.client.emotes.cross} ***${msg.language.get("ER_CATS_DOGS")}***`));
-            const $ = cheerio.load(text);
+        const res = await this.fetchURL(`https://c.xkcd.com/random/comic/`, { type: "text" })
+            .catch(() => null);
+        if (!res) throw `${this.client.emotes.cross} ***${msg.language.get("ER_CATS_DOGS")}***`;
 
-            const embed = new MessageEmbed()
-                .setFooter("© PenguBot.com")
-                .setTimestamp()
-                .setColor("RANDOM")
-                .setDescription(`**Random Comic**`)
-                .setImage(`http:${$("#rcg-comic").first().find("img").first().attr("src").replace(/\\/g, "/")}`);
-            return msg.sendEmbed(embed);
-        } catch (e) {
-            return msg.sendMessage(`${this.client.emotes.cross} ***${msg.language.get("ER_CATS_DOGS")}***`);
-        }
+        const root = parse(res);
+        const img = root.querySelector("#comic").querySelector("img").getAttribute("src");
+        console.log(img);
+
+        return msg.sendEmbed(new MessageEmbed()
+            .setFooter("© PenguBot.com - Comic by xkcd.com")
+            .setTimestamp()
+            .setColor("RANDOM")
+            .setImage(`https:${img}`));
     }
 
 };

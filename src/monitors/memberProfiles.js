@@ -1,7 +1,6 @@
 const { Monitor } = require("../index");
 const { Canvas } = require("canvas-constructor");
 const fs = require("fs-nextra");
-const { get } = require("snekfetch");
 
 const timeout = new Set();
 
@@ -16,15 +15,14 @@ module.exports = class extends Monitor {
     }
 
     async run(msg) {
-        if (!msg.guild) return;
-        if (timeout.has(`${msg.author.id}-${msg.guild.id}`)) return;
+        if (!msg.guild || timeout.has(`${msg.author.id}-${msg.guild.id}`)) return;
         if (this.client.user.id !== "303181184718995457" && await msg.guild.members.fetch("303181184718995457").catch(() => null)) return;
 
         await msg.member.settings.sync(true);
 
         const randomXP = this.client.funcs.randomNumber(1, 5);
-        const oldLevel = msg.member.settings.level;
-        const newXP = msg.member.settings.xp + randomXP;
+        const oldLevel = msg.member.settings.get("level");
+        const newXP = msg.member.settings.get("xp") + randomXP;
         const newLevel = Math.floor(0.2 * Math.sqrt(newXP));
         await msg.member.settings.update([["xp", newXP], ["level", newLevel]]);
 
@@ -35,27 +33,27 @@ module.exports = class extends Monitor {
 
         const { settings } = msg.guild;
 
-        if (settings.toggles.levelup && settings.misc.leveluptype === "guild") await this.handleLevelup(msg);
-        if (settings.toggles.levelroles && settings.roles.levelrole.length) await this.leveledroles(msg);
+        if (settings.get("toggles.levelup") && settings.get("misc.leveluptype") === "guild") await this.handleLevelup(msg);
+        if (settings.get("toggles.levelroles") && settings.get("roles.levelrole").length) await this.leveledroles(msg);
     }
 
     async handleLevelup(msg) {
         if (!msg.channel.postable) return;
 
-        const image = await this.generateLevelUpImage(msg.author.settings.profilebg, msg.author.displayAvatarURL({ format: "png", size: 128 }));
-        return msg.sendMessage(`🆙 | **${msg.author.tag}** has leveled up to **Level ${msg.member.settings.level}** in **${msg.guild.name}**`, { files: [{ attachment: image, name: `${msg.author.id}.png` }] });
+        const image = await this.generateLevelUpImage(msg.author.settings.get("profilebg"), msg.author.displayAvatarURL({ format: "png", size: 128 }));
+        return msg.sendMessage(`🆙 | **${msg.author.tag}** has leveled up to **Level ${msg.member.settings.get("level")}** in **${msg.guild.name}**`, { files: [{ attachment: image, name: `${msg.author.id}.png` }] });
     }
 
     async leveledroles(msg) {
-        const levelRoles = msg.guild.settings.roles.levelrole.filter(leveledRole => msg.member.settings.level >= leveledRole.lvl);
+        const levelRoles = msg.guild.settings.get("roles.levelrole").filter(leveledRole => msg.member.settings.get("level") >= leveledRole.lvl);
         if (!levelRoles.length) return;
 
         const promises = [];
 
         for (const levelRole of levelRoles) {
-            if (msg.member.roles.has(levelRole.id)) continue;
+            if (msg.member.roles.cache.has(levelRole.id)) continue;
 
-            const role = msg.guild.roles.get(levelRole.id);
+            const role = msg.guild.roles.cache.get(levelRole.id);
             if (!role) continue;
 
             if (role.position >= msg.guild.me.roles.highest.position) continue;
@@ -69,7 +67,7 @@ module.exports = class extends Monitor {
     async generateLevelUpImage(background, userAvatar) {
         const [backgroundImage, avatar] = await Promise.all([
             fs.readFile(`../assets/profiles/bg/${background}.png`),
-            get(userAvatar).then(res => res.body).catch(() => null)
+            this.fetchURL(userAvatar, { type: "buffer" }).catch(() => null)
         ]);
 
         return new Canvas(100, 100)

@@ -12,12 +12,10 @@ Raven.config(config.apis.sentry, {
 module.exports = class extends BaseCluster {
 
     launch() {
-        Raven.context(() => this.client.login(this.manager.token));
+        return this.client.login(this.manager.token);
     }
 
 };
 
-process.on("uncaughtException", err => {
-    console.error(`uncaughtException:\n${err.stack}`);
-    Raven.captureException(err);
-});
+process.on("uncaughtException", err => Raven.captureException(err));
+process.on("unhandledRejection", err => Raven.captureException(err));

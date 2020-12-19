@@ -17,7 +17,7 @@ module.exports = class extends Command {
 
     async run(msg, [user]) {
         if (!user) user = await msg.guild.members.fetch(msg.author.id).catch(() => null);
-        return msg.sendEmbed(new MessageEmbed()
+        const embed = new MessageEmbed()
             .setColor(user.displayHexColor ? user.displayHexColor : "#32c4e3")
             .setTimestamp()
             .setFooter("© PenguBot.com")
@@ -27,8 +27,11 @@ module.exports = class extends Command {
             .addField("❯ Discord Join Date", this.timestamp.display(user.user.createdAt), true)
             .addField("❯ Server Join Date", user.joinedTimestamp ? this.timestamp.display(user.joinedTimestamp) : "Unknown", true)
             .addField("❯ Nickname", user.nickname || "None", true)
-            .addField("❯ Bot?", user.bot ? "Yes" : "No", true)
-            .addField(`❯ Roles [${user.roles.size}]`, user.roles.size ? `<@&${user.roles.map(r => r.id).filter(r => r !== msg.guild.defaultRole.id).join(">, <@&")}>` : "None"));
+            .addField("❯ Bot?", user.user.bot ? "Yes" : "No", true)
+            .addField("❯ Roles", user.roles.cache.size - 1, true);
+
+        if ((user.roles.size - 1) > 0) embed.setDescription(`<@&${user.roles.map(r => r.id).filter(r => r !== msg.guild.roles.everyone.id).join("> <@&")}>`);
+        return msg.sendEmbed(embed);
     }
 
 };

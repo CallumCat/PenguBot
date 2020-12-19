@@ -46,7 +46,7 @@ module.exports = class extends Language {
                 "Ensuite, votez pour PenguBot via le lien ci-dessous et débloquez également l'accès à",
                 "fonctionnalités limitées que seuls les votants peuvent avoir accès!",
                 "",
-                "• **Vote:** https://discordbots.org/bot/PenguBot/vote"],
+                "• **Vote:** https://top.gg/bot/PenguBot/vote"],
             COMMAND_TOGGLE_GROUP_DESCRPTION: "Désactiver/Activer les Catégories de Commandes.",
             COMMAND_TOGGLE_COMMAND_DESCRPTION: "Désactiver/Activer les Commandes dans ta guilde.",
             COMMAND_SUPPORT_DESCRIPTION: "Link to join PenguBot's Support Guild.",
@@ -318,9 +318,9 @@ module.exports = class extends Language {
             MESSAGE_STAR_CHANNEL_SET: "Successfully set the Starboard channel.",
 
             // Custom Messages
-            ER_TRY_AGAIN: "I am very sorry but was an error, please try again or contact us at https://discord.gg/kWMcUNe",
-            ER_MUSIC_TRIP: "I tripped on a wire! *Ouch!* It hurts but I'll recover, try again later or contact us at https://discord.gg/kWMcUNe",
-            ER_MUSIC_NF: "<:penguError:435712890884849664> I could not find any results for your query, please try again with a different one or contact us at https://discord.gg/kWMcUNe",
+            ER_TRY_AGAIN: "I am very sorry but there was an error, please try again or contact us at https://discord.gg/u8WYw5r",
+            ER_MUSIC_TRIP: "I tripped on a wire! *Ouch!* It hurts but I'll recover, try again later or contact us at https://discord.gg/u8WYw5r",
+            ER_MUSIC_NF: "<:penguError:435712890884849664> I could not find any results for your query, please try again with a different one or contact us at https://discord.gg/u8WYw5r",
             ER_CATS_DOGS: "There was an error, I think a cat has cut the wire off, dogs don't do that.",
             ER_API: "Unfortunately due to the provider of this command's API getting down, this command is temporarily disabled.",
             ER_TINDER: "Can't match you with yourself...",
@@ -347,7 +347,7 @@ module.exports = class extends Language {
             CMD_FORT_PLAT: "Invalid Username or Platform, please retry with either of these platforms: `pc`. `xbox`, `psn`.",
             CMD_FORT_ERR: "There was an error in the Tracking API, please try again later.",
             CMD_OSU_ERR: "Either the user couldn't be found or we're having some issues.",
-            CMD_UPVOTE_ONLY: "You are not an up-voter of PenguBot, please visit <https://discordbots.org/bot/PenguBot/vote> to vote now and get access!",
+            CMD_UPVOTE_ONLY: "You are not an up-voter of PenguBot, please visit <https://top.gg/bot/PenguBot/vote> to vote now and get access!",
             CMD_PATRON_ONLY: "Cette commande est verrouillée pour les utilisateurs uniquement. Si vous souhaitez devenir Patron, rendez-vous sur https://patreon.com/PenguBot et accédez au bot Premium.",
             CMD_RPS_INVALID: "That's an invalid move, please choose",
             CMD_SLOTS_INVALID: "The specified amount of Snowflakes is invalid, please enter at least 1 or more Snowflakes.",
@@ -452,6 +452,7 @@ module.exports = class extends Language {
             COMMAND_MODLOG_DESCRIPTION: "Change the Mod Logs setting in the server.",
 
             COMMAND_MEME_DESCRIPTION: "Grabs you a random meme from the interwebs.",
+            COMMAND_WHOLESOME_DESCRIPTION: "Grabs you a random wholesome image from the interwebs.",
             COMMAND_ROLEINFO_DESCRIPTION: "Get information about a role in a server.",
 
             // Commands (Start of cleaning up Language files)
@@ -460,7 +461,8 @@ module.exports = class extends Language {
 
             // Monitors
             MONITOR_AFK_REMOVED: username => `Welcome back **${username}**, I have removed you from AFK.`,
-            MONITOR_AFK_ISAFK: (username, reason, time) => `**${username}** is currently AFK for \`${reason}\` - ${Duration.toNow(time)} ago`
+            MONITOR_AFK_ISAFK: (username, reason, time) => `**${username}** is currently AFK for \`${reason}\` - ${Duration.toNow(time)} ago`,
+            settingGatewayDuplicateValue: "That value already exists, please provide a different one."
         };
     }
 

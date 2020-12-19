@@ -68,8 +68,10 @@ module.exports = class ModLog {
      * @returns {Promise<KlasaMessage>}
      */
     async send() {
-        if (!this.guild.settings.channels.modlogs) return;
-        const channel = this.guild.channels.get(this.guild.settings.channels.modlogs);
+        const channelId = this.guild.settings.get("channels.modlogs");
+        if (!channelId) return;
+        let channel = this.guild.channels.cache.get(channelId);
+        if (!channel) channel = this.client.channels.fetch(channelId);
         if (!channel) return;
 
         await this.getCase();
@@ -89,7 +91,7 @@ module.exports = class ModLog {
             .setDescription([
                 `**❯ Type**: ${this.type[0].toUpperCase() + this.type.slice(1)}`,
                 `**❯ User**: ${this.user.tag} (${this.user.id})`,
-                `**❯ Reason**: ${this.reason || `Use \`${this.guild.settings.prefix}reason ${this.case}\` to claim this log.`}`
+                `**❯ Reason**: ${this.reason || `Use \`${this.guild.settings.get("prefix")}reason ${this.case}\` to claim this log.`}`
             ].join("\n"))
             .setFooter(`Case: ${this.case}`)
             .setTimestamp();
@@ -100,10 +102,9 @@ module.exports = class ModLog {
      * @returns {KlasaMessage}
      */
     async getCase() {
-        this.case = this.guild.settings.modlogs.length;
+        this.case = this.guild.settings.get("modlogs").length;
         this.timestamp = new Date().getTime();
-        const { errors } = await this.guild.settings.update("modlogs", this.caseInfo);
-        if (errors.length) throw errors[0];
+        await this.guild.settings.update("modlogs", this.caseInfo).catch(e => console.error(`[Modlog] ${e}`));
         return this.case;
     }
 

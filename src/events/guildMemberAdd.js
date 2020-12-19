@@ -16,17 +16,26 @@ module.exports = class extends Event {
     }
 
     welcomeMessage(member) {
-        if (!member.guild.settings.toggles.joinmsg) return;
-        const channel = member.guild.channels.get(member.guild.settings.channels.join);
+        if (!member.guild.settings.get("toggles.joinmsg")) return;
+        const channel = member.guild.channels.cache.get(member.guild.settings.get("channels.join"));
         if (!channel) return;
         if (!channel.postable) return;
-        return channel.send(this.replaceText(member.guild.settings.messages.join, member));
+        return channel.send(this.replaceText(member.guild.settings.get("messages.join"), member));
     }
 
     autoroles(member) {
-        if (!member.guild.settings.toggles.autoroles) return;
+        if (!member.guild.settings.get("toggles.autoroles") || !member.guild.settings.get("roles.autorole")) return;
         if (!member.guild.me || !member.guild.me.permissions.has("MANAGE_ROLES")) return;
-        return member.roles.add(member.guild.settings.autoroles, "PenguBot - AutoRole Feature").catch(() => null);
+
+        const roles = member.guild.settings.get("roles.autorole");
+        const fetchedRoles = [];
+        for (const role of roles) {
+            if (!member.guild.roles.cache.has(role)) continue;
+            if (role.position >= member.guild.me.roles.highest.position) continue;
+            fetchedRoles.push(member.guild.roles.cache.get(role));
+        }
+
+        return member.roles.add(fetchedRoles, "PenguBot.com - Autorole Feature").catch(() => null);
     }
 
     replaceText(str, member) {

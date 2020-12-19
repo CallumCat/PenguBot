@@ -11,7 +11,7 @@ module.exports = class extends Command {
             permissionLevel: 6,
             requiredPermissions: ["USE_EXTERNAL_EMOJIS", "EMBED_LINKS"],
             description: language => language.get("COMMAND_MAKE_STAFF_DESCRPTION"),
-            usage: "<add|remove|list> [member:membername|role:rolename]",
+            usage: "<add|remove|list> [member:member|role:rolename]",
             usageDelim: " ",
             subcommands: true,
             extendedHelp: "No extended help available."
@@ -23,15 +23,16 @@ module.exports = class extends Command {
 
         const type = memberOrRole instanceof Role ? "role" : "member";
         if (type === "member") {
-            if (msg.guild.settings.users.staff.includes(memberOrRole)) return msg.sendMessage(`${this.client.emotes.cross} ***That user is already a Staff, try another user or removing them first.***`);
-            const { errors } = await msg.guild.settings.update("users.staff", memberOrRole.id);
-            if (errors.length) return msg.sendMessage(`${this.client.emotes.cross} ***There was an error: \`${errors[0]}\`***`);
+            if (msg.guild.settings.get("users.staff").includes(memberOrRole)) return msg.sendMessage(`${this.client.emotes.cross} ***That user is already a Staff, try another user or removing them first.***`);
+            await msg.guild.settings.update("users.staff", memberOrRole, { arrayAction: "add", guild: msg.guild }).catch(e => {
+                console.error(`${this.name} error:\n${e}`);
+                throw `${this.client.emotes.cross} ***There was an error: \`${e}\`***`;
+            });
             return msg.sendMessage(`${this.client.emotes.check} ***${memberOrRole} has been added as a Staff.***`);
         }
         if (type === "role") {
-            if (msg.guild.settings.roles.staff === memberOrRole.id) return msg.sendMessage(`${this.client.emotes.cross} ***That role is already a Staff, try another role or removing it first.***`);
-            const { errors } = await msg.guild.settings.update("roles.staff", memberOrRole.id, msg.guild);
-            if (errors.length) return msg.sendMessage(`${this.client.emotes.cross} ***There was an error: \`${errors[0]}\`***`);
+            if (msg.guild.settings.get("roles.staff") === memberOrRole.id) return msg.sendMessage(`${this.client.emotes.cross} ***That role is already a Staff, try another role or removing it first.***`);
+            await msg.guild.settings.update("roles.staff", memberOrRole, { guild: msg.guild });
             return msg.sendMessage(`${this.client.emotes.check} ***${memberOrRole.name} role has been added as a Staff.***`);
         }
     }
@@ -41,29 +42,33 @@ module.exports = class extends Command {
 
         const type = memberOrRole instanceof Role ? "role" : "member";
         if (type === "member") {
-            if (!msg.guild.settings.users.staff.includes(memberOrRole.id)) return msg.sendMessage(`${this.client.emotes.cross} ***That user is not a Staff, try another user or adding them first.***`);
-            const { errors } = await msg.guild.settings.update("users.staff", memberOrRole.id);
-            if (errors.length) return msg.sendMessage(`${this.client.emotes.cross} ***There was an error: \`${errors[0]}\`***`);
+            if (!msg.guild.settings.get("users.staff").includes(memberOrRole.id)) return msg.sendMessage(`${this.client.emotes.cross} ***That user is not a Staff, try another user or adding them first.***`);
+            await msg.guild.settings.update("users.staff", memberOrRole.id, { arrayAction: "remove", guild: msg.guild }).catch(e => {
+                console.error(`${this.name} error:\n${e}`);
+                throw `${this.client.emotes.cross} ***There was an error: \`${e}\`***`;
+            });
             return msg.sendMessage(`${this.client.emotes.check} ***${memberOrRole} has been removed from Staff.***`);
         }
         if (type === "role") {
-            if (msg.guild.settings.roles.staff !== memberOrRole.id) return msg.sendMessage(`${this.client.emotes.cross} ***That role is already a Staff, try another role or adding it first.***`);
-            const { errors } = await msg.guild.settings.reset("roles.staff");
-            if (errors.length) return msg.sendMessage(`${this.client.emotes.cross} ***There was an error: \`${errors[0]}\`***`);
+            if (msg.guild.settings.get("roles.staff") !== memberOrRole.id) return msg.sendMessage(`${this.client.emotes.cross} ***That role is already a Staff, try another role or adding it first.***`);
+            await msg.guild.settings.reset("roles.staff").catch(e => {
+                console.error(`${this.name} error:\n${e}`);
+                throw `${this.client.emotes.cross} ***There was an error: \`${e}\`***`;
+            });
             return msg.sendMessage(`${this.client.emotes.check} ***${memberOrRole.name} role has been removed as a Staff.***`);
         }
     }
 
     async list(msg) {
-        const role = msg.guild.settings.roles.staff;
-        const users = msg.guild.settings.users.staff;
+        const role = msg.guild.settings.get("roles.staff");
+        const users = msg.guild.settings.get("users.staff");
 
         return msg.sendMessage({ embed: new MessageEmbed()
             .setTimestamp()
             .setFooter("PenguBot.com")
             .setColor("#7cf062")
             .setAuthor("Staff - PenguBot", this.client.user.displayAvatarURL())
-            .setDescription([`${role ? `**Role:** ${msg.guild.roles.get(role)}\n` : "**Role:** None\n"}`,
+            .setDescription([`${role ? `**Role:** ${msg.guild.roles.cache.get(role)}\n` : "**Role:** None\n"}`,
                 `${users.length ? `**Members:**\n- <@${users.join("\n- <@")}>\n\n` : "**Members:** None"}`].join("\n")) });
     }
 

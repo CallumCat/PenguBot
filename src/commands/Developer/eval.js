@@ -1,6 +1,5 @@
-const { Command, Stopwatch, Type, util } = require("klasa");
+const { Command, Stopwatch, Type, klasaUtil: util, util: { haste } } = require("../../index");
 const { inspect } = require("util");
-const { post } = require("snekfetch");
 
 module.exports = class extends Command {
 
@@ -17,16 +16,16 @@ module.exports = class extends Command {
     }
 
     async run(msg, [code]) {
-        const flagTime = "wait" in msg.flags ? Number(msg.flags.wait) : 30000;
+        const flagTime = "wait" in msg.flagArgs ? Number(msg.flagArgs.wait) : 30000;
         const { success, result, time, type } = await this.timedEval(msg, code, flagTime);
 
-        if (msg.flags.silent) {
+        if (msg.flagArgs.silent) {
             if (!success && result && result.stack) this.client.emit("error", result.stack);
             return null;
         }
 
         const footer = util.codeBlock("ts", type);
-        const sendAs = msg.flags.output || msg.flags["output-to"] || (msg.flags.log ? "log" : null);
+        const sendAs = msg.flagArgs.output || msg.flagArgs["output-to"] || (msg.flagArgs.log ? "log" : null);
         return this.handleMessage(msg, { sendAs, hastebinUnavailable: false, url: null }, { success, result, time, footer });
     }
 
@@ -39,7 +38,7 @@ module.exports = class extends Command {
             }
             case "haste":
             case "hastebin": {
-                if (!options.url) options.url = await this.getHaste(result).catch(() => null);
+                if (!options.url) options.url = await haste(result).catch(() => null);
                 if (options.url) return msg.sendMessage(`**Output:**\n${options.url}\n\n**Type:**${footer}\n${time}`);
                 options.hastebinUnavailable = true;
                 await this.getTypeOutput(msg, options);
@@ -93,7 +92,7 @@ module.exports = class extends Command {
         let thenable = false;
         let type;
         try {
-            if (msg.flags.async) code = `(async () => {\n${code}\n})();`;
+            if (msg.flagArgs.async) code = `(async () => {\n${code}\n})();`;
             result = eval(code);
             syncTime = stopwatch.toString();
             type = new Type(result);
@@ -115,8 +114,8 @@ module.exports = class extends Command {
         stopwatch.stop();
         if (typeof result !== "string") {
             result = result instanceof Error ? result.stack : inspect(result, {
-                depth: msg.flags.depth ? parseInt(msg.flags.depth) || 0 : 0,
-                showHidden: Boolean(msg.flags.showHidden)
+                depth: msg.flagArgs.depth ? parseInt(msg.flagArgs.depth) || 0 : 0,
+                showHidden: Boolean(msg.flagArgs.showHidden)
             });
         }
         return { success, type, time: this.formatTime(syncTime, asyncTime), result: util.clean(result) };
@@ -124,14 +123,6 @@ module.exports = class extends Command {
 
     formatTime(syncTime, asyncTime) {
         return asyncTime ? `⏱ ${asyncTime}<${syncTime}>` : `⏱ ${syncTime}`;
-    }
-
-    async getHaste(result) {
-        const { body } = await post("https://hastebin.com/documents").send(result).catch(e => {
-            Error.captureStackTrace(e);
-            return e;
-        });
-        return `https://hastebin.com/${body.key}.js`;
     }
 
 };

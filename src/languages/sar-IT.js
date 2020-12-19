@@ -46,7 +46,7 @@ module.exports = class extends Language {
                 "Allora vota per PenguBot tramite il link sottostante e sblocca l'accesso",
                 "a tutte quelle caratteristiche che sono riservate a coloro che ci votano!!",
                 "",
-                "â€¢ **Votaci:** https://discordbots.org/bot/PenguBot/vote"],
+                "â€¢ **Votaci:** https://top.gg/bot/PenguBot/vote"],
             COMMAND_TOGGLE_GROUP_DESCRPTION: "Abilita/Disabilita le categorie dei comandi.",
             COMMAND_TOGGLE_COMMAND_DESCRPTION: "Abilita/Disabilita i comandi sul tuo server.",
             COMMAND_SUPPORT_DESCRIPTION: "Link per connetterti al Server di Supporto di PenguBot.",
@@ -319,9 +319,9 @@ module.exports = class extends Language {
             MESSAGE_STAR_CHANNEL_SET: "Canale Starboard impostato correttamente.",
 
             // Custom Messages
-            ER_TRY_AGAIN: "Sono spiacente, ma c'è stato un errore.. Riprova più tardi. Se il problema persiste, contattaci su https://discord.gg/kWMcUNe",
-            ER_MUSIC_TRIP: "Accidenti!!! Ho qualche problema sulla traccia indicata.. Riprova più tardi. Se il problema persiste, contattaci su https://discord.gg/kWMcUNe",
-            ER_MUSIC_NF: "<:penguError:435712890884849664> Non sono riuscito a trovare alcun risultato per la tua richiesta. Riprova più tardi. Se il problema persiste, contattaci su https://discord.gg/kWMcUNe",
+            ER_TRY_AGAIN: "Sono spiacente, ma c'è stato un errore.. Riprova più tardi. Se il problema persiste, contattaci su https://discord.gg/u8WYw5r",
+            ER_MUSIC_TRIP: "Accidenti!!! Ho qualche problema sulla traccia indicata.. Riprova più tardi. Se il problema persiste, contattaci su https://discord.gg/u8WYw5r",
+            ER_MUSIC_NF: "<:penguError:435712890884849664> Non sono riuscito a trovare alcun risultato per la tua richiesta. Riprova più tardi. Se il problema persiste, contattaci su https://discord.gg/u8WYw5r",
             ER_CATS_DOGS: "C'è stato un errore! Penso che un gatto abbia smangiucchiato il cavo.. un cane certe cose non le fa!",
             ER_API: "Sfortunatamente, a causa di una mancanza del provider, questo comando è stato momentaneamente disabilitato.",
             ER_TINDER: "Non trovo corrispondenze per te .. ",
@@ -349,7 +349,7 @@ module.exports = class extends Language {
             CMD_FORT_PLAT: "NomeUtente o Piattaforma non validi. Riprova con una delle seguenti piattaforme: `pc`. `xbox`, `psn`.",
             CMD_FORT_ERR: "Errore nelle Tracking API. Riprova più tardi ..",
             CMD_OSU_ERR: "O non sono riuscito a trovare l'utente .. o abbiamo grossi problemi!!",
-            CMD_UPVOTE_ONLY: "Non hai ancora votato per PenguBot!! Visita il sito <https://discordbots.org/bot/PenguBot/vote> per votare PenguBot ed ottenere l'accesso!",
+            CMD_UPVOTE_ONLY: "Non hai ancora votato per PenguBot!! Visita il sito <https://top.gg/bot/PenguBot/vote> per votare PenguBot ed ottenere l'accesso!",
             CMD_PATRON_ONLY: "Questo server non è un server premium. Considera l'idea di diventare un Patron su <https://patreon.com/PenguBot> per ottenere l'accesso a taluni comandi.",
             CMD_RPS_INVALID: "Mossa non valida. Seleziona nuovamente ..",
             CMD_SLOTS_INVALID: "Il quantitativo di Snowflakes indicato non è valido. Inserisci ALMENO 1 o più Snowflakes.",
@@ -447,6 +447,7 @@ module.exports = class extends Language {
             COMMAND_MODLOG_DESCRIPTION: "Change the Mod Logs setting in the server.",
 
             COMMAND_MEME_DESCRIPTION: "Grabs you a random meme from the interwebs.",
+            COMMAND_WHOLESOME_DESCRIPTION: "Grabs you a random wholesome image from the interwebs.",
             COMMAND_ROLEINFO_DESCRIPTION: "Get information about a role in a server.",
 
             // Commands (Start of cleaning up Language files)
@@ -455,7 +456,8 @@ module.exports = class extends Language {
 
             // Monitors
             MONITOR_AFK_REMOVED: username => `Welcome back **${username}**, I have removed you from AFK.`,
-            MONITOR_AFK_ISAFK: (username, reason, time) => `**${username}** is currently AFK for \`${reason}\` - ${Duration.toNow(time)} ago`
+            MONITOR_AFK_ISAFK: (username, reason, time) => `**${username}** is currently AFK for \`${reason}\` - ${Duration.toNow(time)} ago`,
+            settingGatewayDuplicateValue: "That value already exists, please provide a different one."
         };
     }
 

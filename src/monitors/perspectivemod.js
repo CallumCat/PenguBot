@@ -1,5 +1,4 @@
 const { Monitor, ServerLog, config } = require("../index");
-const { post } = require("snekfetch");
 
 module.exports = class extends Monitor {
 
@@ -8,17 +7,25 @@ module.exports = class extends Monitor {
     }
 
     async run(msg) {
-        if (!msg.guild || !msg.content || msg.command || !msg.guild.settings.toggles.perspective) return;
-        //       if (msg.guild.settings.toggles.staffbypass && await msg.hasAtLeastPermissionLevel(3)) return;
-        //       if (this.client.user.id !== "303181184718995457" && await msg.guild.members.fetch("303181184718995457").catch(() => null)) return;
+        if (!msg.guild || !msg.content || msg.command) return;
+        if (!msg.guild.settings.get("toggles.perspective")) return;
 
-        const { body } = await post(`https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze?key=${config.apis.perspective}`)
-            .send({ comment: { text: msg.content }, requestedAttributes: { SEVERE_TOXICITY: {}, TOXICITY: {}, OBSCENE: {}, THREAT: {}, SEXUALLY_EXPLICIT: {}, SPAM: {}, PROFANITY: {} } })
-            .catch(() => ({ body: null }));
+        if (msg.guild.settings.get("toggles.staffbypass") && await msg.hasAtLeastPermissionLevel(3)) return;
+
+        const body = await this.fetchURL("https://commentanalyzer.googleapis.com/v1alpha1/comments:analyze", {
+            query: { key: config.apis.perspective },
+            headers: { "Content-Type": "application/json" },
+            method: "POST",
+            body: JSON.stringify({
+                comment: { text: msg.content },
+                requestedAttributes: { SEVERE_TOXICITY: {}, TOXICITY: {}, OBSCENE: {}, THREAT: {}, SEXUALLY_EXPLICIT: {}, SPAM: {}, PROFANITY: {} }
+            })
+        }).catch(() => null);
 
         if (!body) return;
 
-        const { perspective } = msg.guild.settings.automod;
+        const perspectiveMap = msg.guild.settings.get("automod.perspective");
+        const perspective = Object.fromEntries(perspectiveMap);
 
         for (const key of Object.keys(body.attributeScores)) {
             if (!perspective[key].enabled) continue;

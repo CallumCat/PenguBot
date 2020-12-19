@@ -67,4 +67,10 @@ package-lock.json
 .vscode
 
 # yarn lock
-yarn.lock
+yarn-error.log
+
+dist
+
+.yarn
+.yarnrc
+.yarnrc.yml

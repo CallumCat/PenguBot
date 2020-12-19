@@ -1,20 +1,20 @@
 const Command = require("../../lib/structures/KlasaCommand");
 const { Canvas } = require("canvas-constructor");
 const fs = require("fs-nextra");
-const { get } = require("snekfetch");
 const { join } = require("path");
 
-Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "Roboto-Regular.ttf"), "Roboto");
-Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "RobotoCondensed-Regular.ttf"), "Roboto Condensed");
-Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "RobotoMono-Light.ttf"), "Roboto Mono");
-Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "NotoEmoji-Regular.ttf"), "NotoEmoji");
+Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "Roboto-Regular.ttf"), { family: "Roboto" });
+Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "RobotoCondensed-Regular.ttf"), { family: "Roboto Condensed" });
+Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "RobotoMono-Light.ttf"), { family: "Roboto Mono" });
+Canvas.registerFont(join(__dirname, "..", "..", "..", "assets", "fonts", "NotoEmoji-Regular.ttf"), { family: "NotoEmoji" });
 
 module.exports = class extends Command {
 
     constructor(...args) {
         super(...args, {
             runIn: ["text"],
-            cooldown: 60,
+            aliases: ["level"],
+            cooldown: 15,
             requiredPermissions: ["USE_EXTERNAL_EMOJIS", "ATTACH_FILES"],
             description: language => language.get("COMMAND_RANK_DESCRIPTION"),
             usage: "[user:membername]",
@@ -33,7 +33,8 @@ module.exports = class extends Command {
         await member.settings.sync(true);
         await member.user.settings.sync(true);
         const r = this.client.providers.default.db;
-        const { xp, level: lvl } = member.settings;
+        const xp = member.settings.get("xp");
+        const lvl = member.settings.get("level");
 
         const oldLvl = Math.floor((lvl / 0.2) ** 2);
         const nextLvl = Math.floor(((lvl + 1) / 0.2) ** 2);
@@ -46,14 +47,11 @@ module.exports = class extends Command {
 
         const rank = data.findIndex(i => i.id.split(".")[1] === member.user.id) + 1;
 
-        const bgName = member.user.settings.profilebg;
+        const bgName = member.user.settings.get("profilebg");
         const bgImg = await fs.readFile(`../assets/profiles/backgrounds/${bgName}.png`);
         const template = await fs.readFile(`../assets/profiles/backgrounds/template.png`);
         const pbar = await fs.readFile(`../assets/profiles/backgrounds/progressbar.png`);
-        const avatar = await get(member.user.displayAvatarURL({ format: "png", sze: 256 })).then(res => res.body).catch(e => {
-            Error.captureStackTrace(e);
-            return e;
-        });
+        const avatar = await this.fetchURL(member.user.displayAvatarURL({ format: "png", sze: 256 }), { type: "buffer" });
 
         const render = await new Canvas(1000, 300)
             // Initializing and Text
