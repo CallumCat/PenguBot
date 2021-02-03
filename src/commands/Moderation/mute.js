@@ -22,14 +22,17 @@ module.exports = class extends Command {
         if (member.id === msg.author.id) return msg.reply(`${this.client.emotes.cross} ***You can not mute yourself...***`);
         if (member.id === this.client.user.id) return msg.reply(`${this.client.emotes.cross} ***Why would you want to mute Pengu?***`);
 
-        const roleID = msg.guild.settings.get("roles.muted");
+        const roleID = await this.dbQueryFetch(msg);
         if (!roleID || !msg.guild.roles.cache.has(roleID)) await this.createRole(msg);
 
-        const role = await msg.guild.roles.fetch(msg.guild.settings.get("roles.muted")).catch(() => null);
+        const role = await msg.guild.roles.fetch(await this.dbQueryFetch(msg)).catch(() => null);
         if (!role) return msg.sendMessage("There was an error, I couldn't find the Muted role! Please try again or contact us at: https://discord.gg/u8WYw5r");
 
         const myRole = msg.guild.me.roles.highest;
-        if (role.position > myRole.positon) return msg.sendMessage(`${this.client.emotes.cross} ***The \`PENGUMUTED\` role is above my role in the guild, please change the order.***`);
+        if (role.position > myRole.positon) return msg.sendMessage(`${this.client.emotes.cross} ***The \`PENGUMUTED\` role is above my role in the hierarchy, please change the order and try again.***`);
+
+        const highestRole = member.roles.highest;
+        if (myRole.position < highestRole.positon) return msg.sendMessage(`${this.client.emotes.cross} ***That user has a role above my role in the hierarchy, please change the order and try again.***`);
 
         const time = msg.flagArgs.time || msg.flagArgs.duration || msg.flagArgs.tempmute;
         let duration = null;
@@ -37,7 +40,7 @@ module.exports = class extends Command {
         if (time && (duration.offset < 1 || duration.offset > 2592000000)) throw `${this.client.emotes.cross} ***Duration is invalid, try something like 1 hour, 1 day, etc. Maximum 30 days.***`;
 
         if (member.roles.cache.has(role.id)) {
-            await member.roles.remove(role)
+            await member.roles.remove(role.id)
                 .catch(e => msg.reply(`${this.client.emotes.cross} ***There was an error: ${e}***`));
 
             if (msg.guild.settings.get("channels.modlogs")) {
@@ -51,7 +54,7 @@ module.exports = class extends Command {
 
             return msg.sendMessage(`${this.client.emotes.check} ***${member.user.tag} ${msg.language.get("MESSAGE_UNMUTED")}***`);
         } else {
-            await member.roles.add(role)
+            await member.roles.add(role.id)
                 .catch(e => msg.reply(`${this.client.emotes.cross} ***There was an error: ${e}***`));
 
             if (msg.guild.settings.get("channels.modlogs")) {
@@ -69,21 +72,50 @@ module.exports = class extends Command {
     }
 
     async createRole(msg) {
-        if (!msg.guild.me.permissions.has("MANAGE_ROLES")) return msg.sendMessage(`${this.client.emotes.cross} ***I do not have \`MANAGE ROLES\` permissions. Please give me it first for this to work.`);
+        if (!msg.guild.me.permissions.has("MANAGE_ROLES")) throw msg.sendMessage(`${this.client.emotes.cross} ***I do not have \`MANAGE ROLES\` permissions. Please assign the permission and try again.***`);
 
         const newRole = await msg.guild.roles.create({
             data: {
                 name: "PENGUMUTED",
                 permissions: [FLAGS.VIEW_CHANNEL]
             }
-        }).catch(e => msg.reply(`There was an error: ${e}`));
+        }).catch(() => null);
+        if (!newRole) throw msg.reply(`There was an error. Make sure Pengu has appropriate permissions and try again.`);
 
-        const { errors } = await msg.guild.settings.update("roles.muted", newRole.id);
-        if (errors) return msg.sendMessage(`${this.client.emotes.cross} ***There was an error: ${errors[0]}***`);
+        await this.dbQueryUpdate(msg, newRole.id);
 
         const promises = [];
         for (const channel of msg.guild.channels.cache.values()) promises.push(channel.updateOverwrite(newRole, { SEND_MESSAGES: false, ADD_REACTIONS: false, CONNECT: false }, `Mute Command Executed By ${msg.author.tag}`));
-        await Promise.all(promises);
+        // Catching for channels that don't allow permission
+        await Promise.all(promises).catch(() => null);
+    }
+
+    async dbQueryUpdate(msg, roleID) {
+        const r = this.client.providers.default.db;
+        const query = await r.table("guilds").get(msg.guild.id)
+            .update({ roles: { muted: roleID } })
+            .run()
+            .catch(e => {
+                console.error(`${this.name} error:\n${e}`);
+                throw `There was an error, please contact us on our support server: <https://pengubot.com/support>\n${e}`;
+            });
+
+        await msg.guild.settings.sync(true);
+        return query;
+    }
+
+    async dbQueryFetch(msg) {
+        const r = this.client.providers.default.db;
+        const query = await r.table("guilds").get(msg.guild.id)
+            .getField("roles")
+            .run()
+            .catch(e => {
+                console.error(`${this.name} error:\n${e}`);
+                throw `There was an error, please contact us on our support server: <https://pengubot.com/support>\n${e}`;
+            });
+
+        if (!query.muted) return null;
+        return query.muted;
     }
 
 };
